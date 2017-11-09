@@ -1,0 +1,190 @@
+consumes:
+- application/json
+definitions:
+  ImageMedia:
+    description: Image metadata (default view)
+    example:
+      filename: Illo aut.
+      id: 5.8100146e+18
+      uploaded_at: 2014-03-10T11:53:37Z
+    properties:
+      filename:
+        description: Image filename
+        example: Illo aut.
+        type: string
+      id:
+        description: Image ID
+        example: 5.8100146e+18
+        format: int64
+        type: integer
+      uploaded_at:
+        description: Upload timestamp
+        example: 2014-03-10T11:53:37Z
+        format: date-time
+        type: string
+    required:
+    - id
+    - filename
+    - uploaded_at
+    title: 'Mediatype identifier: application/json; view=default'
+    type: object
+  ImageMediaCollection:
+    description: ImageMediaCollection is the media type for an array of ImageMedia
+      (default view)
+    example:
+    - filename: Illo aut.
+      id: 5.8100146e+18
+      uploaded_at: 2014-03-10T11:53:37Z
+    - filename: Illo aut.
+      id: 5.8100146e+18
+      uploaded_at: 2014-03-10T11:53:37Z
+    items:
+      $ref: '#/definitions/ImageMedia'
+    title: 'Mediatype identifier: application/json; type=collection; view=default'
+    type: array
+  error:
+    description: Error response media type (default view)
+    example:
+      code: invalid_value
+      detail: Value of ID must be an integer
+      id: 3F1FKVRR
+      meta:
+        timestamp: 1.458609e+09
+      status: "400"
+    properties:
+      code:
+        description: an application-specific error code, expressed as a string value.
+        example: invalid_value
+        type: string
+      detail:
+        description: a human-readable explanation specific to this occurrence of the
+          problem.
+        example: Value of ID must be an integer
+        type: string
+      id:
+        description: a unique identifier for this particular occurrence of the problem.
+        example: 3F1FKVRR
+        type: string
+      meta:
+        additionalProperties: true
+        description: a meta object containing non-standard meta-information about
+          the error.
+        example:
+          timestamp: 1.458609e+09
+        type: object
+      status:
+        description: the HTTP status code applicable to this problem, expressed as
+          a string value.
+        example: "400"
+        type: string
+    title: 'Mediatype identifier: application/vnd.goa.error; view=default'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: mauro.delazeri@image-uploader.com
+    name: Mauro Delazeri
+  description: This API exposes an image resource that allows uploading and downloading
+    images
+  title: ISprime
+  version: ""
+paths:
+  /api/images/:
+    post:
+      description: Upload multiple images in multipart request
+      operationId: image#upload
+      produces:
+      - application/json; type=collection
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ImageMediaCollection'
+      schemes:
+      - http
+      summary: upload image
+      tags:
+      - image
+  /api/images/{id}:
+    get:
+      description: Show an image metadata
+      operationId: image#show
+      parameters:
+      - description: Image ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ImageMedia'
+        "404":
+          description: Not Found
+      schemes:
+      - http
+      summary: show image
+      tags:
+      - image
+  /download/{filename}:
+    get:
+      operationId: image#/download/*filename
+      parameters:
+      - description: Relative file path
+        in: path
+        name: filename
+        required: true
+        type: string
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+        "404":
+          description: File not found
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - http
+      summary: Download images/
+  /swagger-ui/{filepath}:
+    get:
+      operationId: swagger#/swagger-ui/*filepath
+      parameters:
+      - description: Relative file path
+        in: path
+        name: filepath
+        required: true
+        type: string
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+        "404":
+          description: File not found
+          schema:
+            $ref: '#/definitions/error'
+      schemes:
+      - http
+      summary: Download swagger-ui/
+  /swagger.json:
+    get:
+      operationId: swagger#/swagger.json
+      responses:
+        "200":
+          description: File downloaded
+          schema:
+            type: file
+      schemes:
+      - http
+      summary: Download swagger/swagger.json
+produces:
+- application/json
+responses:
+  NotFound:
+    description: Not Found
+schemes:
+- http
+swagger: "2.0"
